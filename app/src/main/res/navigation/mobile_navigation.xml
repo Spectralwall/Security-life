@@ -10,8 +10,17 @@
         android:name="com.example.securitylife.Fragment.login"
         android:label="Login"
         tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_navigationLogin_to_navigationMain"
+            app:destination="@id/navigationMain" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigationMain"
+        android:name="com.example.securitylife.Fragment.Main_page"
+        android:label="Main"
+        tools:layout="@layout/fragment_main_page" >
+    </fragment>
 
 
 </navigation>
