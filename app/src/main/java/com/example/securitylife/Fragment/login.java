@@ -1,7 +1,10 @@
 package com.example.securitylife.Fragment;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -17,11 +20,21 @@ import android.widget.Toast;
 import com.example.securitylife.Model.Data;
 import com.example.securitylife.R;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Objects;
+
 public class login extends Fragment {
 
-    Button login;
-    EditText password;
-    EditText chiave;
+    private static final String FILE_NAME = "data.txt";
+    private Button login;
+    private EditText password;
+    private EditText chiave;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,5 +72,56 @@ public class login extends Fragment {
         });
 
         return view;
+    }
+
+    //metodo per salvare su file
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void save() {
+        String text = password.getText().toString();//prende la password
+        FileOutputStream fos = null;//creo un FileoutputStream
+        try {
+            //gli dico che deve prendere il file nella memoria privata
+            fos = requireContext().openFileOutput(FILE_NAME, requireContext().MODE_PRIVATE);
+            fos.write(text.getBytes());//e scrivere
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    //metodo per leggere da file
+    private void load() {
+        FileInputStream fis = null;//creo il file imput stream
+        try {
+            fis = requireContext().openFileInput(FILE_NAME);//prendo il file
+            InputStreamReader isr = new InputStreamReader(fis);//creo lo stream reader
+            BufferedReader br = new BufferedReader(isr);//prendo il buffer
+            StringBuilder sb = new StringBuilder();//lo string builder
+            String text;//creo una stringa
+            while ((text = br.readLine()) != null) {
+                sb.append(text).append("\n");//appiccico tutto insieme
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
