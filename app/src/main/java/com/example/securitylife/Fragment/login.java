@@ -53,12 +53,13 @@ public class login extends Fragment {
         chiave = (EditText) view.findViewById(R.id.chiave);
 
         login.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
                 // se clicco il bottone vado nel fragment principale dell'applicazione
                 // ma prima devo controllare la password e salvare la chiave di cifratura
                 if(password.getText().toString().trim().length() != 0 && chiave.getText().toString().trim().length() != 0){
-                    if (password.getText().toString().equals("1234")){
+                    if (PasswordCorrect()){
                         Data.setKey(Integer.parseInt(chiave.getText().toString()));
                         NavHostFragment.findNavController(login.this)
                                 .navigate(R.id.action_navigationLogin_to_navigationMain);
@@ -66,12 +67,73 @@ public class login extends Fragment {
                         Toast.makeText(getContext(),"password non corretta",Toast.LENGTH_LONG).show();
                     }
                 }else{
-                    Toast.makeText(getContext(),"inserie la password e o la chiave",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(),"inserie la password o la chiave",Toast.LENGTH_LONG).show();
                 }
             }
         });
 
         return view;
+    }
+
+    /*
+    * funzione per controllare se la password e corretta
+    * se il file esiste controllo la password
+    * se non esiste lo creo e la salvo
+    */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private boolean PasswordCorrect(){
+        boolean correct = false;
+        File file = new File(requireContext().getFilesDir(), FILE_NAME);
+        if(file.exists()){
+            FileInputStream fis = null;//creo il file imput stream
+            try {
+                fis = requireContext().openFileInput(FILE_NAME);//prendo il file
+                InputStreamReader isr = new InputStreamReader(fis);//creo lo stream reader
+                BufferedReader br = new BufferedReader(isr);//prendo il buffer
+                String text = null;
+                while ((text = br.readLine()) != null) {
+                    if(text.contains("password")){
+                        String[] ps = text.split(":");
+                        if(ps[1].toString().trim().equals(password.getText().toString())){
+                            correct = true;
+                        }
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }else{
+            String text = password.getText().toString();//prende la password
+            FileOutputStream fos = null;//creo un FileoutputStream
+            try {
+                //gli dico che deve prendere il file nella memoria privata
+                fos = requireContext().openFileOutput(FILE_NAME, requireContext().MODE_PRIVATE);
+                fos.write(text.getBytes());//e scrivere
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return correct;
     }
 
     //metodo per salvare su file
